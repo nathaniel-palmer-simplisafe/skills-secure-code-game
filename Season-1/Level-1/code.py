@@ -17,17 +17,21 @@ Order = namedtuple('Order', 'id, items')
 Item = namedtuple('Item', 'type, description, amount, quantity')
 
 def validorder(order: Order):
-    net = 0
+    products = 0
+    payments = 0
 
     for item in order.items:
-        if item.type == 'payment':
-            net += item.amount
-        elif item.type == 'product':
-            net -= item.amount * item.quantity
+        if item.type == 'product':
+            products += int(item.amount * 100) * int(item.quantity)
+        elif item.type == 'payment':
+            payments += int(item.amount * 100)
         else:
             return "Invalid item type: %s" % item.type
+        if products > 99999:
+            return "Total amount payable for an order exceeded"
 
-    if net != 0:
-        return "Order ID: %s - Payment imbalance: $%0.2f" % (order.id, net)
+    net = products - payments
+    if net > 0:
+        return "Order ID: %s - Payment imbalance: $%0.2f" % (order.id, net / 100)
     else:
         return "Order ID: %s - Full payment received!" % order.id
